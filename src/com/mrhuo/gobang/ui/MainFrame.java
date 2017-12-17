@@ -33,7 +33,7 @@ public class MainFrame extends JFrame implements LoginListener {
     private GameInfo gameInfo;
 
     public MainFrame() {
-        super("社会大学习惯 - 五子棋 v1.0.1");
+        super("勉強五子棋");
         this.init();
     }
 

@@ -52,7 +52,7 @@ public class ChessBoard extends JPanel implements DropChessListener, OnReceiveSe
         gameLogic.setDropChessListener(this);
         gameLogic.setOnReceiveServerActionListener(this);
         gameLogic.setOnGameOverListener(this);
-
+        //检测鼠标移动位置，绘制选手将要落子位置
         this.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {

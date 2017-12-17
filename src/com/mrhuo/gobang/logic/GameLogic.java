@@ -262,8 +262,7 @@ public class GameLogic {
     //电脑计算得到最优点
     private ChessPoint getBestPoint() {
         int maxScore = 0;
-        java.util.List<ChessPoint> pointList = new ArrayList<>();
-        java.util.List<ChessPoint> allPoint = new ArrayList<ChessPoint>();
+        java.util.List<ChessPoint> allPoint = new ArrayList<>();
         for (int i = 0; i < 15; i++) {
             for (int j = 0; j < 15; j++) {
                 if (chessColors[i][j] != null) continue;
