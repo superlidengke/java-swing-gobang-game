@@ -10,7 +10,6 @@ import com.mrhuo.gobang.events.DropChessListener;
 import com.mrhuo.gobang.events.LoginListener;
 import com.mrhuo.gobang.events.OnGameOverListener;
 import com.mrhuo.gobang.events.OnReceiveServerActionListener;
-import com.mrhuo.gobang.ui.LoginFrame;
 
 import java.awt.*;
 import java.io.IOException;
@@ -99,55 +98,6 @@ public class GameLogic {
         return currentChessColor;
     }
 
-    /**
-     * 创建到服务器的连接
-     *
-     * @return
-     */
-    private synchronized boolean startSocket() {
-        try {
-            if (this.clientSocket != null && !this.clientSocket.isClosed()) {
-                this.clientSocket.close();
-            }
-            if (this.receiveThread != null) {
-                this.receiveThread.interrupt();
-            }
-        } catch (Exception ignored) {
-        }
-        try {
-            this.clientSocket = new Socket(CONSTANT.serverAddress, CONSTANT.serverPort);
-
-            receiveThread = new Thread(new clientReceiveThread(this.clientSocket));
-            receiveThread.start();
-
-            //Thread heartBeatThread = new Thread(new heartBeatThread(this.clientSocket));
-            //heartBeatThread.start();
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    /**
-     * 登陆到服务器
-     */
-    public void loginToServer() {
-        if (!startSocket()) {
-            CONSTANT.alertUser("连接服务器失败，无法登录，稍后再试~~");
-            return;
-        }
-        try {
-            CONSTANT.sendData(this.clientSocket.getOutputStream(),
-                    GameData.createData(GameAction.USER_LOGIN)
-                            .setUser(this.currentUser)
-            );
-            //this.loginListener.onLoginSuccess(user);
-        } catch (Exception ex) {
-            CONSTANT.alertUser("登录失败，稍后再试~~");
-            ex.printStackTrace();
-        }
-    }
 
     /**
      * 登录功能
@@ -157,43 +107,11 @@ public class GameLogic {
             CONSTANT.debug("login(): loginListener can't be null");
             return;
         }
-        LoginFrame loginFrame = new LoginFrame(null, true);
-        loginFrame.setVisible(true);
-        User user = loginFrame.getLoginedUser();
-        if (user == null) {
-            this.loginListener.onLoginFailed("取消登录");
-            return;
-        }
-
+        User user = new User(CONSTANT.randomName(), null);
         this.currentUser = user;
         this.loginListener.onLoginSuccess(user);
     }
 
-    /**
-     * 退出登录功能
-     */
-    public void logout() {
-        if (this.loginListener == null) {
-            CONSTANT.debug("login(): loginListener can't be null");
-            return;
-        }
-        //人人对弈时需要登录服务器
-        if (GameMode.WITH_PEOPLE == this.getGameMode()) {
-            try {
-                CONSTANT.sendData(this.clientSocket.getOutputStream(),
-                        GameData.createData(GameAction.USER_LOGOUT)
-                                .setUser(this.currentUser)
-                );
-                this.clientSocket.close();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-        this.chessColors = new ChessColor[15][15];
-        this.currentUser = null;
-        this.isGameStart = false;
-        this.loginListener.onLoginFailed("退出登录");
-    }
 
     /**
      * 在鼠标点击区域落子
@@ -201,10 +119,6 @@ public class GameLogic {
      * @param point
      */
     public void dropChess(Point point) {
-        if (!this.isUserLogined()) {
-            CONSTANT.alertUser("请您先登录！");
-            return;
-        }
         if (!this.isGameStart()) {
             CONSTANT.alertUser("游戏还未开始！");
             return;

@@ -8,6 +8,4 @@ import com.mrhuo.gobang.bean.User;
 
 public interface LoginListener {
     void onLoginSuccess(User user);
-
-    void onLoginFailed(String message);
 }

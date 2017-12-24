@@ -21,8 +21,6 @@ public class MainFrame extends JFrame implements LoginListener {
 
     private final GameLogic gameLogic = GameLogic.getInstance();
     private JMenuBar menuBar;
-    private JMenu systemFunction;
-    private JMenuItem loginMenu;
     private JMenu peopleWithRobotFight;
     private JMenuItem peopleWithRobotFightPeopleHoldBlack;
     private JMenuItem peopleWithRobotFightPeopleHoldWhite;
@@ -50,30 +48,21 @@ public class MainFrame extends JFrame implements LoginListener {
 
         this.setVisible(true);
 
+
         /**
          * 设置用户登录监听
          */
         gameLogic.setLoginListener(this);
+        gameLogic.login();
     }
 
     /**
      * 增加事件
      */
     private void addEventListener() {
-        this.loginMenu.addActionListener(e -> {
-            if (loginMenu.getText().equals("登录")) {
-                gameLogic.login();
-            } else {
-                gameLogic.logout();
-            }
-        });
 
         //人机对弈，人执黑
         this.peopleWithRobotFightPeopleHoldBlack.addActionListener(e -> {
-            if (!gameLogic.isUserLogined()) {
-                CONSTANT.alertUser("您还没有登录！");
-                return;
-            }
             gameLogic.startNewGame(GameMode.WITH_ROBOT, ChessColor.BLACK);
             this.gameInfo.updateUserChess(ChessColor.BLACK);
             this.gameInfo.updateGameStatus("轮到黑方下棋");
@@ -82,10 +71,6 @@ public class MainFrame extends JFrame implements LoginListener {
 
         //人机对弈，人执白
         this.peopleWithRobotFightPeopleHoldWhite.addActionListener(e -> {
-            if (!gameLogic.isUserLogined()) {
-                CONSTANT.alertUser("您还没有登录！");
-                return;
-            }
             gameLogic.startNewGame(GameMode.WITH_ROBOT, ChessColor.WHITE);
             this.gameInfo.updateUserChess(ChessColor.WHITE);
             this.gameInfo.updateGameStatus("轮到黑方下棋");
@@ -98,18 +83,9 @@ public class MainFrame extends JFrame implements LoginListener {
      */
     private void buildMenuBar() {
         this.menuBar = new JMenuBar();
-        this.systemFunction = new JMenu("系统功能");
-        this.loginMenu = new JMenuItem("登录");
-
         this.peopleWithRobotFight = new JMenu("人机对弈");
         this.peopleWithRobotFightPeopleHoldBlack = new JMenuItem("人执黑");
         this.peopleWithRobotFightPeopleHoldWhite = new JMenuItem("人执白");
-
-        //人人对弈下有两个子菜单
-        //  人人对弈：
-        //      |---人执黑
-        //      |---人执白
-        this.systemFunction.add(this.loginMenu);
 
         //人机对弈下有两个子菜单
         //  人机对弈：
@@ -119,15 +95,9 @@ public class MainFrame extends JFrame implements LoginListener {
         this.peopleWithRobotFight.add(this.peopleWithRobotFightPeopleHoldWhite);
 
         //最终菜单条将是：
-        //  |---系统功能
-        //      |---登录/退出
-        //  |---人人对弈
-        //      |---人执黑
-        //      |---人执白
         //  |---人机对弈：
         //      |---人执黑
         //      |---人执白
-        this.menuBar.add(this.systemFunction);
         this.menuBar.add(this.peopleWithRobotFight);
 
         this.setJMenuBar(this.menuBar);
@@ -145,7 +115,7 @@ public class MainFrame extends JFrame implements LoginListener {
     }
 
     /**
-     * 登录成功事件，启动服务器发送登录信息
+     * 登录成功事件
      *
      * @param user
      */
@@ -153,14 +123,7 @@ public class MainFrame extends JFrame implements LoginListener {
     public void onLoginSuccess(User user) {
         this.gameInfo.updateUserInfo("欢迎您，" + user.getName());
         this.gameInfo.updateGameStatus("已登录，请选择对弈方式");
-        this.loginMenu.setText("退出");
     }
 
-    @Override
-    public void onLoginFailed(String msg) {
-        this.gameInfo.updateUserInfo("未登录");
-        this.gameInfo.updateGameStatus("请登录");
-        this.loginMenu.setText("登录");
-        this.gameInfo.updateUserChess(null);
-    }
+
 }
