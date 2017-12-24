@@ -20,10 +20,6 @@ import java.awt.*;
 public class MainFrame extends JFrame implements LoginListener {
 
     private final GameLogic gameLogic = GameLogic.getInstance();
-    private JMenuBar menuBar;
-    private JMenu peopleWithRobotFight;
-    private JMenuItem peopleWithRobotFightPeopleHoldBlack;
-    private JMenuItem peopleWithRobotFightPeopleHoldWhite;
     private ChessBoard chessBoard;
     private GameInfo gameInfo;
 
@@ -42,7 +38,6 @@ public class MainFrame extends JFrame implements LoginListener {
         this.setLayout(new BorderLayout());
         this.setResizable(false);
 
-        this.buildMenuBar();
         this.buildMainContent();
         this.addEventListener();
 
@@ -54,53 +49,50 @@ public class MainFrame extends JFrame implements LoginListener {
          */
         gameLogic.setLoginListener(this);
         gameLogic.login();
+        selectChessAndStart();
     }
 
     /**
      * 增加事件
      */
     private void addEventListener() {
-
         //人机对弈，人执黑
-        this.peopleWithRobotFightPeopleHoldBlack.addActionListener(e -> {
-            gameLogic.startNewGame(GameMode.WITH_ROBOT, ChessColor.BLACK);
-            this.gameInfo.updateUserChess(ChessColor.BLACK);
-            this.gameInfo.updateGameStatus("轮到黑方下棋");
-            repaint();
+        this.blackChess.addActionListener(l -> {
+            selectChessAndStart();
         });
-
         //人机对弈，人执白
-        this.peopleWithRobotFightPeopleHoldWhite.addActionListener(e -> {
-            gameLogic.startNewGame(GameMode.WITH_ROBOT, ChessColor.WHITE);
-            this.gameInfo.updateUserChess(ChessColor.WHITE);
-            this.gameInfo.updateGameStatus("轮到黑方下棋");
-            repaint();
+        this.whiteChess.addActionListener(l -> {
+            selectChessAndStart();
         });
     }
 
     /**
-     * 构造菜单条
+     * Check current user chess color, and the radio button select color,
+     * if user chess color is null,then the game just started,user have not select chess before, just start the game.
+     * if  user chess color is not null, user tried click the button to change the select, check whether
+     * the button select is different with the current user color, if it's restart the game.
      */
-    private void buildMenuBar() {
-        this.menuBar = new JMenuBar();
-        this.peopleWithRobotFight = new JMenu("人机对弈");
-        this.peopleWithRobotFightPeopleHoldBlack = new JMenuItem("人执黑");
-        this.peopleWithRobotFightPeopleHoldWhite = new JMenuItem("人执白");
-
-        //人机对弈下有两个子菜单
-        //  人机对弈：
-        //  |---人执黑
-        //  |---人执白
-        this.peopleWithRobotFight.add(this.peopleWithRobotFightPeopleHoldBlack);
-        this.peopleWithRobotFight.add(this.peopleWithRobotFightPeopleHoldWhite);
-
-        //最终菜单条将是：
-        //  |---人机对弈：
-        //      |---人执黑
-        //      |---人执白
-        this.menuBar.add(this.peopleWithRobotFight);
-
-        this.setJMenuBar(this.menuBar);
+    private void selectChessAndStart(){
+        Boolean blackSelect = this.blackChess.isSelected();
+        ChessColor currentSelect = this.gameLogic.getCurrentUser().getUserChessColor();
+        // at first app start,it's null, auto select black,when user change chess color,it's not null
+        if(currentSelect!=null){
+           Boolean currentBlack = currentSelect == ChessColor.BLACK;
+           if(blackSelect == currentBlack){//if not change the color,ignore the click
+               return;
+           }
+        }
+        if(blackSelect){
+            gameLogic.startNewGame(GameMode.WITH_ROBOT, ChessColor.BLACK);
+            this.gameInfo.updateUserChess(ChessColor.BLACK);
+            this.gameInfo.updateGameStatus("轮到黑方下棋");
+            repaint();
+        }else {
+            gameLogic.startNewGame(GameMode.WITH_ROBOT, ChessColor.WHITE);
+            this.gameInfo.updateUserChess(ChessColor.WHITE);
+            this.gameInfo.updateGameStatus("轮到黑方下棋");
+            repaint();
+        }
     }
 
     /**
@@ -109,9 +101,27 @@ public class MainFrame extends JFrame implements LoginListener {
     private void buildMainContent() {
         this.gameInfo = new GameInfo();
         this.chessBoard = new ChessBoard(this.gameInfo);
-
+        this.controlPane = getControlPane();
+        this.add(this.controlPane,BorderLayout.SOUTH);
         this.add(this.chessBoard, BorderLayout.CENTER);
         this.add(this.gameInfo, BorderLayout.NORTH);
+    }
+    private JRadioButton blackChess;
+    private JRadioButton whiteChess;
+    private JPanel controlPane;
+    private JPanel getControlPane(){
+        blackChess = new JRadioButton();
+        whiteChess = new JRadioButton();
+        ButtonGroup chessSelect = new ButtonGroup();
+        chessSelect.add(blackChess);
+        chessSelect.add(whiteChess);
+        blackChess.setText("黑子（先手）");
+        whiteChess.setText("白子（后手）");
+        blackChess.setSelected(true);
+        controlPane =new JPanel();
+        controlPane.add(blackChess);
+        controlPane.add((whiteChess));
+        return controlPane;
     }
 
     /**
