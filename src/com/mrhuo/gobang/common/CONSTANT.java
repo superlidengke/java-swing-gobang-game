@@ -23,8 +23,6 @@ public final class CONSTANT {
     //服务器端口和地址
     public static final int serverPort = 9988;
     public static final String serverAddress = "127.0.0.1";
-    //自动测试工具开关
-    public static final boolean isAutoTestEnabled = false;
     //调试模式开关
     private static final boolean isDebugMode = true;
     /**

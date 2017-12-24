@@ -23,9 +23,6 @@ public class MainFrame extends JFrame implements LoginListener {
     private JMenuBar menuBar;
     private JMenu systemFunction;
     private JMenuItem loginMenu;
-    private JMenu peopleWithPeopleFight;
-    private JMenuItem peopleWithPeopleFightPeopleHoldBlack;
-    private JMenuItem peopleWithPeopleFightPeopleHoldWhite;
     private JMenu peopleWithRobotFight;
     private JMenuItem peopleWithRobotFightPeopleHoldBlack;
     private JMenuItem peopleWithRobotFightPeopleHoldWhite;
@@ -71,32 +68,6 @@ public class MainFrame extends JFrame implements LoginListener {
             }
         });
 
-        //人人对弈，人执黑
-        this.peopleWithPeopleFightPeopleHoldBlack.addActionListener(e -> {
-            if (!gameLogic.isUserLogined()) {
-                CONSTANT.alertUser("您还没有登录！");
-                return;
-            }
-            gameLogic.loginToServer();
-            gameLogic.startNewGame(GameMode.WITH_PEOPLE, ChessColor.BLACK);
-            this.gameInfo.updateUserChess(ChessColor.BLACK);
-            this.gameInfo.updateGameStatus("轮到黑方下棋");
-            repaint();
-        });
-
-        //人人对弈，人执白
-        this.peopleWithPeopleFightPeopleHoldWhite.addActionListener(e -> {
-            if (!gameLogic.isUserLogined()) {
-                CONSTANT.alertUser("您还没有登录！");
-                return;
-            }
-            gameLogic.loginToServer();
-            gameLogic.startNewGame(GameMode.WITH_PEOPLE, ChessColor.WHITE);
-            this.gameInfo.updateUserChess(ChessColor.WHITE);
-            this.gameInfo.updateGameStatus("轮到黑方下棋");
-            repaint();
-        });
-
         //人机对弈，人执黑
         this.peopleWithRobotFightPeopleHoldBlack.addActionListener(e -> {
             if (!gameLogic.isUserLogined()) {
@@ -129,9 +100,6 @@ public class MainFrame extends JFrame implements LoginListener {
         this.menuBar = new JMenuBar();
         this.systemFunction = new JMenu("系统功能");
         this.loginMenu = new JMenuItem("登录");
-        this.peopleWithPeopleFight = new JMenu("人人对弈");
-        this.peopleWithPeopleFightPeopleHoldBlack = new JMenuItem("人执黑");
-        this.peopleWithPeopleFightPeopleHoldWhite = new JMenuItem("人执白");
 
         this.peopleWithRobotFight = new JMenu("人机对弈");
         this.peopleWithRobotFightPeopleHoldBlack = new JMenuItem("人执黑");
@@ -142,24 +110,6 @@ public class MainFrame extends JFrame implements LoginListener {
         //      |---人执黑
         //      |---人执白
         this.systemFunction.add(this.loginMenu);
-
-        if (CONSTANT.isAutoTestEnabled) {
-            JMenuItem autoTest = new JMenuItem("自动测试");
-            autoTest.addActionListener(e -> {
-                if (autoTest.getText().equals("自动测试")) {
-                    if (gameLogic.startAutoTest()) {
-                        autoTest.setText("退出自动测试");
-                    }
-                } else {
-                    autoTest.setText("自动测试");
-                    gameLogic.stopAutoTest();
-                }
-            });
-            this.systemFunction.add(autoTest);
-        }
-
-        this.peopleWithPeopleFight.add(this.peopleWithPeopleFightPeopleHoldBlack);
-        this.peopleWithPeopleFight.add(this.peopleWithPeopleFightPeopleHoldWhite);
 
         //人机对弈下有两个子菜单
         //  人机对弈：
@@ -178,7 +128,6 @@ public class MainFrame extends JFrame implements LoginListener {
         //      |---人执黑
         //      |---人执白
         this.menuBar.add(this.systemFunction);
-        this.menuBar.add(this.peopleWithPeopleFight);
         this.menuBar.add(this.peopleWithRobotFight);
 
         this.setJMenuBar(this.menuBar);
