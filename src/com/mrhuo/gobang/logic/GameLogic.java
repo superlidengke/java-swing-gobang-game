@@ -135,23 +135,7 @@ public class GameLogic {
             return;
         }
         //如果当前位置没有棋子
-        if (GameMode.WITH_PEOPLE == gameMode) {
-            try {
-                GameData gameData = GameData.createData(GameAction.USER_DROP_CHESS)
-                        .setUser(this.currentUser)
-                        .setPoint(chessPoint);
-                CONSTANT.sendData(this.clientSocket.getOutputStream(), gameData);
-                CONSTANT.debug("已发送数据到服务器：" + gameData);
-
-                this.putChess(chessPoint);
-                if (this.dropChessListener != null) {
-                    this.dropChessListener.onDropChess(chessPoint.getX(), chessPoint.getY(), currentChessColor);
-                }
-            } catch (Exception ex) {
-                CONSTANT.alertUser("发送数据到服务器失败，稍后再试~~");
-                ex.printStackTrace();
-            }
-        } else {
+        if (GameMode.WITH_ROBOT == gameMode) {
             ruler.setChess(chessColors);
             this.putChess(chessPoint);
             if (this.dropChessListener != null) {
@@ -297,17 +281,6 @@ public class GameLogic {
                 this.turnSwap();
             } else {
                 //WIN!!
-                if (GameMode.WITH_PEOPLE == gameMode) {
-                    try {
-                        GameData gameData = GameData.createData(GameAction.GAME_OVER)
-                                .setUser(this.currentUser);
-                        CONSTANT.sendData(this.clientSocket.getOutputStream(), gameData);
-                        CONSTANT.debug("已发送数据到服务器：" + gameData);
-                    } catch (Exception ex) {
-                        CONSTANT.alertUser("发送数据到服务器失败，稍后再试~~");
-                        ex.printStackTrace();
-                    }
-                }
                 gameOver(isWin);
             }
         } catch (Exception ex) {
@@ -429,68 +402,4 @@ public class GameLogic {
         return true;
     }
 
-    /**
-     * 心跳线程
-     */
-    class heartBeatThread implements Runnable {
-        private Socket socket;
-
-        public heartBeatThread(Socket socket) {
-            this.socket = socket;
-        }
-
-        @Override
-        public void run() {
-            while (CONSTANT.isSocketConnected(socket)) {
-                try {
-                    Thread.sleep(30000);
-                    CONSTANT.sendData(
-                            socket.getOutputStream(),
-                            GameData.createData(GameAction.HEART_BEAT).setUser(getCurrentUser()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    socket = null;
-                    break;
-                }
-            }
-        }
-    }
-
-    /**
-     * 客户端接收线程
-     */
-    class clientReceiveThread implements Runnable {
-        private Socket socket;
-
-        public clientReceiveThread(Socket socket) {
-            this.socket = socket;
-        }
-
-        @Override
-        public void run() {
-            while (CONSTANT.isSocketConnected(socket)) {
-                try {
-                    GameData gameData = CONSTANT.receiveData(socket.getInputStream());
-                    if (gameData.getAction() == GameAction.USER_DROP_CHESS) {
-                        if (!gameData.getUser().equals(currentUser)) {
-                            chessColors[gameData.getPoint().getX()][gameData.getPoint().getY()]
-                                    = gameData.getUser().getUserChessColor();
-                            turnSwap();
-                            if (onReceiveServerActionListener != null) {
-                                onReceiveServerActionListener.onReceiveServerAction(
-                                        socket,
-                                        gameData.getAction(),
-                                        gameData);
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    socket = null;
-                    break;
-                }
-            }
-            CONSTANT.debug("SOCKET 已断开~");
-        }
-    }
 }

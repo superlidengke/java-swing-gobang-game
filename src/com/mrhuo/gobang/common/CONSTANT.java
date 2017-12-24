@@ -4,12 +4,10 @@
 
 package com.mrhuo.gobang.common;
 
-import com.mrhuo.gobang.bean.GameData;
-
 import javax.swing.*;
 import java.awt.*;
-import java.io.*;
-import java.net.Socket;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Random;
 
 /**
@@ -20,9 +18,6 @@ public final class CONSTANT {
     public static final int gridSize = 30;
     public static final int offsetSizeX = 90;
     public static final int offsetSizeY = 40;
-    //服务器端口和地址
-    public static final int serverPort = 9988;
-    public static final String serverAddress = "127.0.0.1";
     //调试模式开关
     private static final boolean isDebugMode = true;
     /**
@@ -108,34 +103,6 @@ public final class CONSTANT {
         return null;
     }
 
-    /**
-     * 向服务器 OutputStream 中写入数据
-     *
-     * @param outputStream
-     * @param gameData
-     * @throws Exception
-     */
-    public static void sendData(OutputStream outputStream, GameData gameData) throws Exception {
-        synchronized (outputStream) {
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-            objectOutputStream.writeObject(gameData);
-            objectOutputStream.flush();
-        }
-    }
-
-    /**
-     * 从服务器的流中读取数据
-     *
-     * @param inputStream
-     * @return
-     * @throws Exception
-     */
-    public static GameData receiveData(InputStream inputStream) throws Exception {
-        synchronized (inputStream) {
-            ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-            return (GameData) objectInputStream.readObject();
-        }
-    }
 
     /**
      * 给用户弹出信息
@@ -144,16 +111,6 @@ public final class CONSTANT {
      */
     public static void alertUser(String msg) {
         JOptionPane.showMessageDialog(null, msg);
-    }
-
-    /**
-     * 判断SOCKET是否已经连接，可用
-     *
-     * @param socket
-     * @return
-     */
-    public static boolean isSocketConnected(Socket socket) {
-        return socket != null && socket.isConnected() && !socket.isClosed();
     }
 
     /**
